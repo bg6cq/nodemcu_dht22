@@ -76,24 +76,18 @@ wifi.sta.connect()
 
 -- Read out DHT22 sensor using dht module
 function func_read_dht()
-  status, temp, humi, temp_dec, humi_dec = dht.read(2)
+  status, temp, humi, temp_dec, humi_dec = dht.read(dht_pin)
   if( status == dht.OK ) then
     if FLOAT_FIRMWARE then
-      -- Float firmware using this example
-      print(string.format("DHT Temperature: %.1f - Humidity: %.1f",temp, humi))
       temp_humi = string.format("temp=%.1f&humi=%.1f",temp,humi)
-      print(temp_humi)
     else
-      -- Integer firmware using this example
-      print(string.format("DHT Temperature:%d.%03d - Humidity:%d.%03d",
-        temp,temp_dec,humi,humi_dec))
       temp_humi = string.format("temp=%d.%03d&humi=%d.%03d",temp, temp_dec, humi, humi_dec)
-      print(temp_humi)
     end
+    print(temp_humi)
     count ++
     if( count == 10 ) then
       count = 0
-      print("try to send")
+      print("try to send to "..http_url)
       if wifi.sta.status() == 5 then  --STA_GOTIP
          print("Connected to "..wifi.sta.getip())
          url=http_url .. "?mac=" .. wifi.sta.getmac().. "&" .. temp_humi
