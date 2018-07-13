@@ -30,15 +30,24 @@ function func_read_dht()
       print("try to send to "..http_url)
       if wifi.sta.status() == 5 then  --STA_GOTIP
          print("Connected to "..wifi.sta.getip())
-         url=http_url .. "?mac=" .. wifi.sta.getmac().. "&" .. temp_humi
+         url= "?mac=" .. wifi.sta.getmac().. "&" .. temp_humi
          print(url)
-         http.get(url, nil, function(code, data)
-           if (code < 0) then
-             print("HTTP request failed")
-           else
-             print(code, data)
-           end
-         end)
+         print("Sending data to 202.38.64.40")
+         conn=net.createConnection(net.TCP, 0) 
+         conn:on("receive", function(conn, payload) print(payload) end)
+         conn:connect(80,'202.38.64.40') 
+         conn:send("GET /send_temp_humi.php"..url.." HTTP/1.1\r\n") 
+         conn:send("Host: 202.38.64.40\r\n") 
+         conn:send("Accept: */*\r\n") 
+         conn:send("User-Agent: Mozilla/4.0 (compatible; esp8266 Lua; Windows NT 5.1)\r\n")
+         conn:send("\r\n")
+         conn:on("sent",function(conn)
+           print("Closing connection")
+           conn:close()
+           end)
+         conn:on("disconnection", function(conn)
+           print("Got disconnection...")
+           end)
       else
          print("wifi still connecting...")
       end
