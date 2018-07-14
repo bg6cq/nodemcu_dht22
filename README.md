@@ -45,6 +45,8 @@ https://gist.github.com/thomo/bb539bb7d5b5f2398a62c7d6ef1231b4
 
    `esptool.py --port COM3 write_flash 0 nodemcu-master-7-modules-2018-07-12-12-49-11-float.bin`
 
+   说明：nodemcu-master-7-modules-2018-07-12-12-49-11-float.bin 由 https://nodemcu-build.com/ 生成，选择了 dht, file, http, net, tmr, uart, wifi 模块。
+
 5. 安装ESPlorer
 
    请参考 https://esp8266.ru/esplorer/ 安装
@@ -61,4 +63,4 @@ https://gist.github.com/thomo/bb539bb7d5b5f2398a62c7d6ef1231b4
 
 8. 调整参数
 
-   根据需要可以调整config.lua的参数   
+   根据需要可以调整config.lua的参数
