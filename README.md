@@ -28,3 +28,22 @@
 https://tiestvangool.ghost.io/2016/09/04/capturing-sensor-data-dht22/
 https://gist.github.com/thomo/bb539bb7d5b5f2398a62c7d6ef1231b4
 
+
+步骤：
+
+1. 安装esptool.py
+   请参考 https://github.com/espressif/esptool 安装esptool.py
+2. 将ESP8266 板子通过USB线连接PC，安装USB驱动，查看得知串口是COM3
+3. 执行如下命令，如果能看到芯片类型，说明串口工作正常
+   `esptool.py --port COM3 chip_id`
+4. 执行如下命令刷新flash
+   `esptool.py --port COM3 write_flash 0 nodemcu-master-7-modules-2018-07-12-12-49-11-float.bin`
+5. 安装ESPlorer
+   请参考 https://esp8266.ru/esplorer/ 安装
+6. 打开ESPlorer
+   选择COM3，115200，open
+   按8266板子USB一侧的RST按钮，能看到“Formatting file system. Please wait..."，等结束。
+7. 写入程序
+   依次打开文件config.lua dht22.lua init.lua，保存后会上传到ESP8266
+8. 调整参数
+   根据需要可以调整config.lua的参数   
