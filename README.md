@@ -1,8 +1,6 @@
 ## 使用nodemcu+DHT22 采集温湿度, 并通过http协议发送
 
-![IMG](dht22_schematic.jpg)
-
-![IMG](NodeMCU_Pinout.png)
+![IMG](dht22_schematic.png)
 
 https://tiestvangool.ghost.io/2016/09/04/capturing-sensor-data-dht22/
 https://gist.github.com/thomo/bb539bb7d5b5f2398a62c7d6ef1231b4
