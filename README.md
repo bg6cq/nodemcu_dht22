@@ -2,22 +2,24 @@
 
 特点：
 
-* 成本低 20-40元
+* 成本低 25-40元
 * 灵活，简单写lua程序
-
+* 支持现场配置，短接2个PIN加电进入配置模式
 
 购买链接：
 
-主控芯片：
+主控芯片和USB线等：
 
 * [ESP8266 Lua WIFI V3](https://item.taobao.com/item.htm?id=531755241333) 15.40元
+* [USB 线](https://item.taobao.com/item.htm?id=557156308010) 1.70元
+* [5*7cm PCB板](https://item.taobao.com/item.htm?id=16090300752) 0.32元
 
 温度传感器可二选一（DHT11误差大，DHT22更精确）:
 
-* [DHT 11](https://item.taobao.com/item.htm?id=19526179299) 5.00元
-* [DHT 22](https://item.taobao.com/item.htm?id=551955065907) 19.80元
+* [DHT11](https://item.taobao.com/item.htm?id=19526179299) 5.00元
+* [DHT22](https://item.taobao.com/item.htm?id=551955065907) 19.80元
 
-外加手机淘汰的USB线和充电器就可以工作。
+外加USB电源就可以工作。
 
 连线图：
 
