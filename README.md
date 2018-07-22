@@ -12,7 +12,7 @@
 
 * [ESP8266 Lua WIFI V3](https://item.taobao.com/item.htm?id=531755241333) 15.40元
 
-温度传感器可二选一（DHT 11误差大）:
+温度传感器可二选一（DHT11误差大，DHT22更精确）:
 
 * [DHT 11](https://item.taobao.com/item.htm?id=19526179299) 5.00元
 * [DHT 22](https://item.taobao.com/item.htm?id=551955065907) 19.80元
@@ -43,9 +43,9 @@ https://gist.github.com/thomo/bb539bb7d5b5f2398a62c7d6ef1231b4
 
 4. 执行如下命令刷新flash
 
-   `esptool.py --port COM3 write_flash 0 nodemcu-master-7-modules-2018-07-12-12-49-11-float.bin`
+   `esptool.py --port COM3 write_flash 0 nodemcu-master-12-modules-2018-07-22-07-55-18-float.bin`
 
-   说明：nodemcu-master-7-modules-2018-07-12-12-49-11-float.bin 由 https://nodemcu-build.com/ 生成，选择了 dht, file, http, net, tmr, uart, wifi 模块。
+   说明：nodemcu-master-12-modules-2018-07-22-07-55-18-float.bin 由 https://nodemcu-build.com/ 生成，选择的模块信息请见 modules.md 。
 
 5. 安装ESPlorer
 
@@ -59,8 +59,15 @@ https://gist.github.com/thomo/bb539bb7d5b5f2398a62c7d6ef1231b4
 
 7. 写入程序
 
-   依次打开文件config.lua dht22.lua init.lua，保存后会上传到ESP8266
+   依次打开 dht22.lua init.lua setup.lua 三个文件上传到ESP8266
 
-8. 调整参数
+8. 设置
+   可以修改 config.lua 上传，也可以不上传 config.lua，进入设置模式修改配置
 
-   根据需要可以调整config.lua的参数
+9. 配置模式
+   如果 config.lua 不存在，或者 将ESP8266板子的D5引脚与相邻的G引脚短接 开机，自动进入配置模式。
+这时请用无线终端连接至ESP8266（由ESP8266板子提供，支持DHCP）无线网络，访问http://192.168.0.1，修改配置后单击 "save" 保存。
+
+   
+   
+   

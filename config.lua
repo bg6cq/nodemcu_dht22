@@ -2,8 +2,8 @@
 wifi_ssid = "ustcnet"
 wifi_password = ""
 
---every 3 seconds read temp&humi，send out every send_count_interval read 
-send_count_interval = 100
+--send out every send_interval seconds
+send_interval = 300
 
 send_http = true
 http_url = "http://202.38.64.40/upload_temp_humi.php"
