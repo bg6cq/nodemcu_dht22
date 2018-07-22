@@ -64,12 +64,10 @@ https://gist.github.com/thomo/bb539bb7d5b5f2398a62c7d6ef1231b4
    依次打开 dht22.lua init.lua setup.lua 三个文件上传到ESP8266
 
 8. 设置
+
    可以修改 config.lua 上传，也可以不上传 config.lua，进入设置模式修改配置
 
 9. 配置模式
-   如果 config.lua 不存在，或者 将ESP8266板子的D5（GPIO14）引脚与相邻的G引脚短接 开机，自动进入配置模式。
-这时请用无线终端连接至ESP8266（由ESP8266板子提供，支持DHCP）无线网络，访问 http://192.168.0.1 ，修改配置后单击 "save" 保存。
 
-   
-   
-   
+   如果 config.lua 不存在，或者 将ESP8266板子的D5（GPIO14）引脚与相邻的G引脚短接 开机，自动进入配置模式。
+这时请用无线设备连接至SSID ESP8266（由ESP8266板子提供，支持DHCP）无线网络，访问 http://192.168.0.1 ，修改配置后单击 "save" 保存。
