@@ -64,7 +64,7 @@ function func_read_dht()
          print("wifi still connecting...")
       end
     end
-    if(count >= send_count_interval) then
+    if(count*3 >= send_interval) then
       count = 0
     end
   elseif(dht_status == dht.ERROR_CHECKSUM) then
