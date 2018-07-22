@@ -11,8 +11,10 @@ function trim(s)
 end
 
 if file.exists("config.lua") then
+  print("config.lua exists")
   dofile("config.lua")
 else
+  print("config.lua do not exists, using default")
   wifi_ssid = "ustcnet"
   wifi_password = ""
   send_interval = 300
@@ -28,8 +30,8 @@ end
 
 print("Setting up Wifi AP")
 wifi.setmode(wifi.SOFTAP)
-wifi.ap.config({ssid="ESP8266"})  
-wifi.ap.setip({ip="192.168.0.1",netmask="255.255.255.0",gateway="192.168.0.1"})
+wifi.ap.config({ssid="ESP8266"})
+wifi.ap.setip({ip="192.168.0.1", netmask="255.255.255.0", gateway="192.168.0.1"})
 print("Setting up webserver")
 
 --web server
@@ -46,38 +48,44 @@ srv:listen(80,function(conn)
     if (vars ~= nil)then
       for k, v in string.gmatch(vars, "(%w+)=([^%&]+)&*") do
         _GET[k] = unescape(v)
+        print(k .. ' ' .. _GET[k])
       end
     end
-             
-    if (_GET.wifi_ssid ~= nil) then
-      client:send("Saving data..")
+    if (_GET.wifissid ~= nil) then
+      print("Saving data")
       file.open("config.lua", "w")
-      file.writeline('wifi_ssid = "' .. _GET.wifi_ssid .. '"')
-      file.writeline('wifi_password = "' .. _GET.wifi_password .. '"')
-      file.writeline('send_interval = "' .. _GET.send_interval.. '"')
+      file.writeline('wifi_ssid = "' .. _GET.wifissid .. '"')
+      if (_GET.wifipassword == nil) then
+        file.writeline('wifi_password = ""')
+      else
+        file.writeline('wifi_password = "' .. _GET.wifipassword .. '"')
+      end
+      file.writeline('send_interval = ' .. _GET.sendinterval .. '')
       file.writeline('send_http = true')
-      file.writeline('http_url = "' .. _GET.http_url.. '"')
+      file.writeline('http_url = "' .. _GET.httpurl .. '"')
       file.writeline('send_aprs = false')
-      file.writeline('dht_pin = "' .. _GET.dht_pin.. '"')
+      file.writeline('dht_pin = "' .. _GET.dhtpin .. '"')
       file.close()
+      buf = "HTTP/1.0 200 OK\r\nContent-Type: text/html\r\n\r\n<!DOCTYPE HTML>\n<html><body>"
+      buf = buf .. "config saved, please reboot"
       client:send(buf)
-      node.restart()
+      print("data saved")
+      return
     end
-   
-    buf = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n<!DOCTYPE HTML>\r\n<html><body>"
-    buf = buf .. "<h3>Configure WiFi</h3><br>"
-    buf = buf .. "<form method='get' action='http://" .. wifi.ap.getip() .."'>"
-    buf = buf .. "Enter wifi SSID: <input type='text' name='wifi_ssid' value='"..wifi_ssid.."'></input><br>"
-    buf = buf .. "Enter wifi password: <input type='password' name='wifi_password' value='"..wifi_password.."'></input><br>"
-    buf = buf .. "DHT PIN: <input type='text' name='dht_pin' value='"..dht_pin.."'></input>(should be 2, GPIO4)<br>"
-    buf = buf .. "Send interval: <input type='text' name='send_interval' value='"..send_interval.."'></input><br>"
-    buf = buf .. "Send URL: <input type='text' name='http_url' value='"..http_url.."'></input><br>"
-    buf = buf .. "<br><button type='submit'>Save</button>"                   
-    buf = buf .. "</form></body></html>"
+    buf = "HTTP/1.0 200 OK\r\nContent-Type: text/html\r\n\r\n<!DOCTYPE HTML>\n<html><body>"
+    buf = buf .. "<h3>Configure WiFi & params</h3><br>"
+    buf = buf .. "<form method='get' action='http://" .. wifi.ap.getip() .."'>\n"
+    buf = buf .. "wifi SSID: <input type='text' name='wifissid' value='"..wifi_ssid.."'></input><br>"
+    buf = buf .. "wifi password: <input type='text' name='wifipassword' value='"..wifi_password.."'></input><br>\n"
+    buf = buf .. "DHT22 PIN: <input type='text' name='dhtpin' value='"..dht_pin.."'></input>(should be 2, GPIO4)<br>"
+    buf = buf .. "Send interval: <input type='text' name='sendinterval' value='"..send_interval.."'></input>seconds<br>\n"
+    buf = buf .. "Send URL: <input type='text' size=100 name='httpurl' value='"..http_url.."'></input><br>"
+    buf = buf .. "<br><button type='submit'>Save</button>\n"
+    buf = buf .. "</form><a href=https://github.com/bg6cq/nodemcu_dht22>https://github.com/bg6cq/nodemcu_dht22</a> by james@ustc.edu.cn</body></html>\n"
     client:send(buf)
-    client:close()
+    -- client:close()
     collectgarbage()
   end)
 end)
    
-print("Please connect to: do setup" .. wifi.ap.getip())
+print("Please connect to: " .. wifi.ap.getip() .. " do setup")
