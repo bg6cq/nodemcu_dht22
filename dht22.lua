@@ -116,6 +116,8 @@ wifi.setmode(wifi.STATION)
 wifi.sta.config({ssid=wifi_ssid, pwd=wifi_password})
 wifi.sta.autoconnect(1)
 wifi.sta.connect()
+
+-- flash key io
 gpio.mode(3, gpio.INPUT)
 
 tmr.alarm(1,3000,tmr.ALARM_AUTO,func_read_dht)
