@@ -89,7 +89,7 @@ if (send_interval < 15) then
 end
 
 if (send_mqtt) then
-  print("init mqtt ESP8266SensorChipID".. node.chipid().." "..mqtt_user." "..mqtt_password)
+  print("init mqtt ESP8266SensorChipID".. node.chipid().." "..mqtt_user.." "..mqtt_password)
   m = mqtt.Client("ESP8266SensorChipID" .. node.chipid() .. ")", 180, mqtt_user, mqtt_password)
   m:on("offline", function(c)
     print("mqtt offline, try connect to "..mqtt_host..":"..mqtt_port)

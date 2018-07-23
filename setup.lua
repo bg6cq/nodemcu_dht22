@@ -22,7 +22,7 @@ else
   file.writeline('dht_pin = 2')
   file.writeline('send_interval = 300')
   file.writeline('send_mqtt = true')
-  file.writeline('mqtt_host= "202.38.64.40"')
+  file.writeline('mqtt_host= "202.141.176.2"')
   file.writeline('mqtt_port = 1883')
   file.writeline('mqtt_user = "user"')
   file.writeline('mqtt_password = "password"')
@@ -76,7 +76,7 @@ srv:listen(80,function(conn)
       if (_GET.mqtthost == nil) then _GET.mqtthost = "" end
       if (_GET.mqttport == nil) then _GET.mqttport = "1883" end
       if (_GET.mqttuser == nil) then _GET.mqttuser = "" end
-      if (_GET.mqttpassowrd == nil) then _GET.mqttpassword = "" end
+      if (_GET.mqttpassword == nil) then _GET.mqttpassword = "" end
       if (_GET.mqtttopic == nil) then _GET.mqtttopic = "" end
       file.writeline('send_mqtt = ' .. _GET.sendmqtt )
       file.writeline('mqtt_host = "' .. _GET.mqtthost .. '"')
