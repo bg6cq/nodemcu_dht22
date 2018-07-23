@@ -30,11 +30,11 @@ wifi.sta.connect()
 function send_data(temp, humi) 
   print("My IP is "..wifi.sta.getip())
   if (send_aprs) then
-    print("try send to aprs "..aprs_server)
+    print("try send to aprs "..aprs_host)
     str=aprs_prefix.."000/000g000t"..string.format("%03d", temp*9/5+32).."r000p000h"..string.format("%02d",humi).."b00000".."ESP8266 MAC "..wifi.sta.getmac()
     print(str)
     conn=net.createUDPSocket()
-    conn:send(aprs_port,aprs_server,str)
+    conn:send(aprs_port,aprs_host,str)
     conn:close()
     print("aprs send ok")
   end
@@ -56,6 +56,10 @@ function func_read_dht()
   status, temp, humi, temp_dec, humi_dec = dht.read(dht_pin)
   if(status == dht.OK) then
     print("DHT read count="..string.format("%d: temp=%.1f, humi=%.1f",count,temp,humi))
+    if (mqtt_connected) then
+       m:publish(mqtt_topic .. "/temperature", string.format("%.1f", temp))
+       m:publish(mqtt_topic .. "/humidity", string.format("%.1f", humi))
+    end
     count = count + 1
     if(count == 4) then
       if wifi.sta.status() == 5 then  --STA_GOTIP
@@ -74,6 +78,23 @@ function func_read_dht()
   else
     print("DHT read null")
   end
+end
+
+mqtt_connected = false
+
+if (send_mqtt) then
+  m = mqtt.Client("Sensor (ID=" .. node.chipid() .. ")", 180, mqtt_user, mqtt_password)
+  m:on("offline", function(c)
+    mqtt_connected = false 
+    m:connect(mqtt_host, mqtt_port, 0, function(c)
+      mqtt_connected = true
+      end)
+    end)
+  end)
+  m:connect(mqtt_host, mqtt_port, 0, function(c)
+    mqtt_connected = true
+    end)
+  end)
 end
 
 tmr.alarm(1,3000,tmr.ALARM_AUTO,func_read_dht)
