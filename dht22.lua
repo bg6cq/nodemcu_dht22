@@ -10,6 +10,13 @@ end
 
 wifi_got_ip_event = function(T)
   print("Wifi connection is ready! IP address is: "..T.IP)
+  if (send_mqtt and not mqtt_connected) then
+    print("mqtt try connect to "..mqtt_host..":"..mqtt_port)
+    m:connect(mqtt_host, mqtt_port, 0, function(c)
+      print("mqtt online")
+      mqtt_connected = true
+    end)
+  end
 end
 
 wifi_disconnect_event = function(T)
@@ -57,13 +64,21 @@ function func_read_dht()
   if(status == dht.OK) then
     print("DHT read count="..string.format("%d: temp=%.1f, humi=%.1f",count,temp,humi))
     if (mqtt_connected) then
-       m:publish(mqtt_topic .. "/temperature", string.format("%.1f", temp))
-       m:publish(mqtt_topic .. "/humidity", string.format("%.1f", humi))
+       print("publish")
+       m:publish(mqtt_topic .. "/temperature", string.format("%.1f", temp),0,0)
+       m:publish(mqtt_topic .. "/humidity", string.format("%.1f", humi),0,0)
     end
     count = count + 1
     if(count == 4) then
       if wifi.sta.status() == 5 then  --STA_GOTIP
          send_data(temp, humi)
+         if (send_mqtt and not mqtt_connected) then
+           print("mqtt try connect to "..mqtt_host..":"..mqtt_port)
+           m:connect(mqtt_host, mqtt_port, 0, function(c)
+             print("mqtt online")
+             mqtt_connected = true
+           end)
+         end
       else
          print("wifi still connecting...")
       end
@@ -83,18 +98,15 @@ end
 mqtt_connected = false
 
 if (send_mqtt) then
+  print("init mqtt sensor ID=".. node.chipid())
   m = mqtt.Client("Sensor (ID=" .. node.chipid() .. ")", 180, mqtt_user, mqtt_password)
   m:on("offline", function(c)
+    print("mqtt offline, try connect to "..mqtt_host..":"..mqtt_port)
     mqtt_connected = false 
     m:connect(mqtt_host, mqtt_port, 0, function(c)
       mqtt_connected = true
       end)
     end)
-  end)
-  m:connect(mqtt_host, mqtt_port, 0, function(c)
-    mqtt_connected = true
-    end)
-  end)
 end
 
 tmr.alarm(1,3000,tmr.ALARM_AUTO,func_read_dht)

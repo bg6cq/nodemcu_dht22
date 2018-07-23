@@ -10,29 +10,32 @@ function trim(s)
   return (s:gsub("^%s*(.-)%s*$", "%1"))
 end
 
+print("runing setup.lua")
+
 if file.exists("config.lua") then
   print("config.lua exists")
-  dofile("config.lua")
 else
   print("config.lua do not exists, using default")
-  wifi_ssid = "ustcnet"
-  wifi_password = ""
-  send_interval = 300
-  send_mtqq = true
-  mqtt_host= "202.38.64.40"
-  mqtt_port = 1883
-  mqtt_user = "user"
-  mqtt_password = "password"
-  mqtt_topic = "/sensor/" .. wifi.sta.getmac()
-  send_http = true
-  http_url = "http://202.38.64.40/upload_temp_humi.php"
-  send_aprs = false
-  aprs_host = "202.141.176.2"
-  aprs_port = 14580
-  aprs_prefix = "BG6CQ-12>ES66:=3149.29N/11716.18E_"
-  --dht module
-  dht_pin = 2  -- Pin for DHT22 sensor (GPIO4)
+  file.open("config.lua", "w")
+  file.writeline('wifi_ssid = "ustcnet"')
+  file.writeline('wifi_password = ""')
+  file.writeline('dht_pin = 2')
+  file.writeline('send_interval = 300')
+  file.writeline('send_mqtt = true')
+  file.writeline('mqtt_host= "202.38.64.40"')
+  file.writeline('mqtt_port = 1883')
+  file.writeline('mqtt_user = "user"')
+  file.writeline('mqtt_password = "password"')
+  file.writeline('mqtt_topic = "/sensor/' .. wifi.sta.getmac() ..'"')
+  file.writeline('send_http = true')
+  file.writeline('http_url = "http://202.38.64.40/upload_temp_humi.php"')
+  file.writeline('send_aprs = false')
+  file.writeline('aprs_host = "202.141.176.2"')
+  file.writeline('aprs_port = 14580')
+  file.writeline('aprs_prefix = "BG6CQ-12>ES66:=3149.29N/11716.18E_"')
+  file.close()
 end
+dofile("config.lua")
 
 print("Setting up Wifi AP")
 wifi.setmode(wifi.SOFTAP)
