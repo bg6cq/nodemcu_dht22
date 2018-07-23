@@ -1,20 +1,16 @@
---wifi module
 wifi_ssid = "ustcnet"
 wifi_password = ""
-
---send out every send_interval seconds
+dht_pin = 2
 send_interval = 300
-
+send_mqtt = true
+mqtt_host= "202.38.64.40"
+mqtt_port = 1883
+mqtt_user = "user"
+mqtt_password = "password"
+mqtt_topic = "/sensor/84:f3:eb:4e:32:86"
 send_http = true
 http_url = "http://202.38.64.40/upload_temp_humi.php"
-
-send_aprs = true
-aprs_server = "202.141.176.2"
+send_aprs = false
+aprs_host = "202.141.176.2"
 aprs_port = 14580
 aprs_prefix = "BG6CQ-12>ES66:=3149.29N/11716.18E_"
-
---dht module
-dht_pin = 2  -- Pin for DHT22 sensor (GPIO4)
--- dht_pin = 3 -- GPIO0
--- dht_pin = 4 -- GPIO2
-print("Global variables loaded")
