@@ -48,7 +48,7 @@ https://gist.github.com/thomo/bb539bb7d5b5f2398a62c7d6ef1231b4
 
    `esptool.py --port COM3 write_flash 0 nodemcu-master-12-modules-2018-07-22-07-55-18-float.bin`
 
-   说明：nodemcu-master-12-modules-2018-07-22-07-55-18-float.bin 由 https://nodemcu-build.com/ 生成，选择的模块信息请见 modules.md 。
+   说明：nodemcu-master-12-modules-2018-07-22-07-55-18-float.bin 由 https://nodemcu-build.com/ 生成，选择的模块有`dht file gpio http mqtt net rtctime sjson sntp tmr uart wifi` 。
 
 5. 安装ESPlorer
 
