@@ -117,7 +117,7 @@ srv:listen(80,function(conn)
     buf = buf .. "wifi password: <input type='text' name='wifipassword' value='"..wifi_password.."'></input><br>\n"
     buf = buf .. "DHT22 PIN: <input type='text' name='dhtpin' value='"..dht_pin.."'></input>(should be 2, GPIO4)<br>"
     
-    buf = buf .. "<hr>MQTT send: <input type='radio' name='sendmqtt' value='true'"
+    buf = buf .. "<hr>MQTT send: <input type='checkbox' name='sendmqtt' value='true'"
     if (send_mqtt) then
        buf = buf .. " checked"
     end 
@@ -131,14 +131,14 @@ srv:listen(80,function(conn)
     
     buf = buf .. "<hr>HTTP and APRS<br>Send interval: <input type='text' name='sendinterval' value='"..send_interval.."'></input>seconds<br>\n"
     
-    buf = buf .. "<hr>HTTP send: <input type='radio' name='sendhttp' value='true'"
+    buf = buf .. "<hr>HTTP send: <input type='checkbox' name='sendhttp' value='true'"
     if (send_http) then
       buf = buf .. " checked"
     end
     buf = buf .. "></input><br>"
     buf = buf .. "Send URL: <input type='text' size=100 name='httpurl' value='"..http_url.."'></input><br>"
 
-    buf = buf .. "<hr>APRS send: <input type='radio' name='sendaprs' value='true'"
+    buf = buf .. "<hr>APRS send: <input type='checkbox' name='sendaprs' value='true'"
     if (send_aprs) then
       buf = buf .. " checked"
     end

@@ -1,6 +1,7 @@
 dofile("config.lua")
 
 count = 0
+mqtt_connected = false
 
 wifi_connect_event = function(T)
   print("Connection to AP("..T.SSID..") established!")
@@ -22,17 +23,6 @@ end
 wifi_disconnect_event = function(T)
   print("wifi disconnect")
 end
-
-wifi.eventmon.register(wifi.eventmon.STA_CONNECTED, wifi_connect_event)
-wifi.eventmon.register(wifi.eventmon.STA_GOT_IP, wifi_got_ip_event)
-wifi.eventmon.register(wifi.eventmon.STA_DISCONNECTED, wifi_disconnect_event)
-
-print("Connecting to WiFi access point...")
-
-wifi.setmode(wifi.STATION)
-wifi.sta.config({ssid=wifi_ssid, pwd=wifi_password})
-wifi.sta.autoconnect(1)
-wifi.sta.connect()
 
 function send_data(temp, humi) 
   print("My IP is "..wifi.sta.getip())
@@ -58,7 +48,6 @@ function send_data(temp, humi)
   end
 end
 
--- Read out DHT22 sensor using dht module
 function func_read_dht()
   status, temp, humi, temp_dec, humi_dec = dht.read(dht_pin)
   if(status == dht.OK) then
@@ -95,11 +84,13 @@ function func_read_dht()
   end
 end
 
-mqtt_connected = false
+if (send_interval < 15) then
+  send_interval = 15
+end
 
 if (send_mqtt) then
-  print("init mqtt sensor ID=".. node.chipid())
-  m = mqtt.Client("Sensor (ID=" .. node.chipid() .. ")", 180, mqtt_user, mqtt_password)
+  print("init mqtt ESP8266SensorChipID".. node.chipid().." "..mqtt_user." "..mqtt_password)
+  m = mqtt.Client("ESP8266SensorChipID" .. node.chipid() .. ")", 180, mqtt_user, mqtt_password)
   m:on("offline", function(c)
     print("mqtt offline, try connect to "..mqtt_host..":"..mqtt_port)
     mqtt_connected = false 
@@ -109,5 +100,15 @@ if (send_mqtt) then
     end)
 end
 
-tmr.alarm(1,3000,tmr.ALARM_AUTO,func_read_dht)
+wifi.eventmon.register(wifi.eventmon.STA_CONNECTED, wifi_connect_event)
+wifi.eventmon.register(wifi.eventmon.STA_GOT_IP, wifi_got_ip_event)
+wifi.eventmon.register(wifi.eventmon.STA_DISCONNECTED, wifi_disconnect_event)
 
+print("Connecting to WiFi access point...")
+
+wifi.setmode(wifi.STATION)
+wifi.sta.config({ssid=wifi_ssid, pwd=wifi_password})
+wifi.sta.autoconnect(1)
+wifi.sta.connect()
+
+tmr.alarm(1,3000,tmr.ALARM_AUTO,func_read_dht)
