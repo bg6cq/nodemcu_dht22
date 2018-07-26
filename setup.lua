@@ -27,6 +27,7 @@ else
   file.writeline('mqtt_user = "user"')
   file.writeline('mqtt_password = "password"')
   file.writeline('mqtt_topic = "/sensor/' .. wifi.sta.getmac() ..'"')
+  file.writeline('mqtt_mode = 0')
   file.writeline('send_http = false')
   file.writeline('http_url = "http://202.38.64.40/upload_temp_humi.php"')
   file.writeline('send_aprs = false')
@@ -78,11 +79,14 @@ srv:listen(80,function(conn)
       if (_GET.mqttuser == nil) then _GET.mqttuser = "" end
       if (_GET.mqttpassword == nil) then _GET.mqttpassword = "" end
       if (_GET.mqtttopic == nil) then _GET.mqtttopic = "" end
+      if (_GET.mqttmode == nil) then _GET.mqttmode = 0 end
+      
       file.writeline('send_mqtt = ' .. _GET.sendmqtt )
       file.writeline('mqtt_host = "' .. _GET.mqtthost .. '"')
       file.writeline('mqtt_port = ' .. _GET.mqttport )
       file.writeline('mqtt_user = "' .. _GET.mqttuser .. '"')
       file.writeline('mqtt_password = "' .. _GET.mqttpassword .. '"')
+      file.writeline('mqtt_mode = ' .. _GET.mqttmode )
       file.writeline('mqtt_topic = "' .. _GET.mqtttopic .. '"')
       
       if (_GET.sendinterval == nil) then _GET.sendinterval = "300" end
@@ -104,7 +108,7 @@ srv:listen(80,function(conn)
       
       file.close()
       buf = "HTTP/1.0 200 OK\r\nContent-Type: text/html\r\n\r\n<!DOCTYPE HTML>\n<html><body>"
-      buf = buf .. "config saved, please reboot"
+      buf = buf .. "config saved, please reboot<p><a href=http://192.168.0.1/>go back</a>"
       client:send(buf)
       print("data saved")
       dofile("config.lua")
@@ -128,6 +132,18 @@ srv:listen(80,function(conn)
     buf = buf .. "MQTT user: <input type='text' name='mqttuser' value='"..mqtt_user.."'></input><br>\n"
     buf = buf .. "MQTT password: <input type='text' name='mqttpassword' value='"..mqtt_password.."'></input><br>\n"
     buf = buf .. "MQTT topic: <input type='text' name='mqtttopic' value='"..mqtt_topic.."'></input><br>\n"
+    buf = buf .. "MQTT Mode: <input type='radio' name='mqttmode' value=0"
+    if (mqtt_mode == 0) then
+      buf = buf .. " checked"
+    end
+    buf = buf .. ">Mode 0</input><input type='radio' name='mqttmode' value=1"
+    if (mqtt_mode == 1) then
+      buf = buf .. " checked"
+    end
+    buf = buf .. ">Mode 1</input><br>"
+    buf = buf .. "mode 0: send seprate temperature & humidity<br>"
+    buf = buf .. "mode 1: send json string<br>"
+    
     
     buf = buf .. "<hr>HTTP and APRS<br>Send interval: <input type='text' name='sendinterval' value='"..send_interval.."'></input>seconds<br>\n"
     
@@ -147,8 +163,8 @@ srv:listen(80,function(conn)
     buf = buf .. "APRS port: <input type='text' name='aprsport' value='"..aprs_port.."'></input><br>\n"
     buf = buf .. "APRS prefix: <input type='text' name='aprsprefix' size=100 value='"..aprs_prefix.."'></input><br>\n"
     
-    buf = buf .. "<br><button type='submit'>Save</button>\n"
-    buf = buf .. "</form><a href=https://github.com/bg6cq/nodemcu_dht22>https://github.com/bg6cq/nodemcu_dht22</a> by james@ustc.edu.cn</body></html>\n"
+    buf = buf .. "<br><button type='submit'>Save</button></form><p>\n"
+    buf = buf .. "<hr><a href=https://github.com/bg6cq/nodemcu_dht22>https://github.com/bg6cq/nodemcu_dht22</a> by james@ustc.edu.cn</body></html>\n"
     client:send(buf)
     -- client:close()
     collectgarbage()
