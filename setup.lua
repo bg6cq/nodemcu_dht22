@@ -193,6 +193,6 @@ tmr.alarm(0, 500, 1, function ()
 end)
 
 -- flash key io
-gpio.mode(3, gpio.INPUT)
+gpio.mode(3, gpio.INPUT, gpio.PULLUP)
 gpio.trig(3, "low", flashkeypress)
 
