@@ -2,6 +2,17 @@ dofile("config.lua")
 
 count = 0
 mqtt_connected = false
+local ledpin = 4
+gpio.mode(ledpin, gpio.OUTPUT)
+gpio.write(ledpin, 1)
+
+function blinkled()
+  gpio.write(ledpin, 0)
+  tmr.alarm(0, 500, 0, function ()
+    gpio.write(ledpin, 1)
+  end)
+end
+
 
 wifi_connect_event = function(T)
   print("Connection to AP("..T.SSID..") established!")
@@ -32,6 +43,7 @@ function send_data(temp, humi)
     conn=net.createUDPSocket()
     conn:send(aprs_port,aprs_host,str)
     conn:close()
+    blinkled()
   end
   if (send_http) then      
     req_url= http_url.."?mac="..wifi.sta.getmac().."&"..string.format("temp=%.1f&humi=%.1f",temp,humi)
@@ -41,6 +53,7 @@ function send_data(temp, humi)
         print("HTTP request failed")
       else
         print(code, data)
+        blinkled()
       end
     end)
   end
@@ -58,6 +71,7 @@ function func_read_dht()
        else
          m:publish(mqtt_topic, string.format("{\"temperature\": %.1f, \"humidity\": %.1f}", temp, humi),0,0)
        end
+       blinkled()
     end
     count = count + 1
     if(count == 4) then

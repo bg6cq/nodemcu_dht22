@@ -178,6 +178,20 @@ function flashkeypress()
   file.remove("config.lua")
 end
 
+-- blink led every 0.5s
+local ledpin = 4
+local ledstatus = 0
+gpio.mode(ledpin, gpio.OUTPUT)
+gpio.write(ledpin, ledstatus)
+tmr.alarm(0, 500, 1, function ()
+  if ledstatus == 0 then
+    ledstatus = 1
+  else
+    ledstatus = 0
+  end
+  gpio.write(ledpin, ledstatus)
+end)
+
 -- flash key io
 gpio.mode(3, gpio.INPUT)
 gpio.trig(3, "low", flashkeypress)
