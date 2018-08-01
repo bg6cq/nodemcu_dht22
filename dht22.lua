@@ -2,6 +2,10 @@ dofile("config.lua")
 
 count = 0
 mqtt_connected = false
+temp = 0
+humi = 0
+rssi = 0
+
 local ledpin = 4
 gpio.mode(ledpin, gpio.OUTPUT)
 gpio.write(ledpin, 1)
@@ -35,18 +39,19 @@ wifi_disconnect_event = function(T)
   print("wifi disconnect")
 end
 
-function send_data(temp, humi) 
+function send_data() 
   if (send_aprs) then
     print("aprs send "..aprs_host)
-    str=aprs_prefix.."000/000g000t"..string.format("%03d", temp*9/5+32).."r000p000h"..string.format("%02d",humi).."b00000".."ESP8266 MAC "..wifi.sta.getmac()
+    str = aprs_prefix.."000/000g000t"..string.format("%03d", temp*9/5+32).."r000p000h"..string.format("%02d",humi).."b00000"
+    str = str.."ESP8266 MAC "..wifi.sta.getmac().." RSSI: "..rssi
     print(str)
-    conn=net.createUDPSocket()
+    conn = net.createUDPSocket()
     conn:send(aprs_port,aprs_host,str)
     conn:close()
     blinkled()
   end
   if (send_http) then      
-    req_url= http_url.."?mac="..wifi.sta.getmac().."&"..string.format("temp=%.1f&humi=%.1f",temp,humi)
+    req_url = http_url.."?mac="..wifi.sta.getmac().."&"..string.format("temp=%.1f&humi=%.1f&rssi=%d",temp,humi,rssi)
     print("http send "..req_url)
     http.get(req_url, nil, function(code, data)
       if (code < 0) then
@@ -62,21 +67,23 @@ end
 function func_read_dht()
   status, temp, humi, temp_dec, humi_dec = dht.read(dht_pin)
   if(status == dht.OK) then
-    print("DHT read count="..string.format("%d: temp=%.1f, humi=%.1f",count,temp,humi))
+    rssi = wifi.sta.getrssi()
+    print("DHT read count="..string.format("%d: temp=%.1f, humi=%.1f, rssi=%d",count,temp,humi,rssi))
     if (mqtt_connected) then
        print("mqtt publish")
        if (mqtt_mode == 0) then
          m:publish(mqtt_topic .. "/temperature", string.format("%.1f", temp),0,0)
          m:publish(mqtt_topic .. "/humidity", string.format("%.1f", humi),0,0)
+         m:publish(mqtt_topic .. "/rssi", string.format("%d", rssi),0,0)
        else
-         m:publish(mqtt_topic, string.format("{\"temperature\": %.1f, \"humidity\": %.1f}", temp, humi),0,0)
+         m:publish(mqtt_topic, string.format("{\"temperature\": %.1f, \"humidity\": %.1f, \"rssi\": %d}", temp, humi, rssi),0,0)
        end
        blinkled()
     end
     count = count + 1
     if(count == 4) then
       if wifi.sta.status() == 5 then  --STA_GOTIP
-         send_data(temp, humi)
+         send_data()
          if (send_mqtt and not mqtt_connected) then
            print("mqtt try connect to "..mqtt_host..":"..mqtt_port)
            m:connect(mqtt_host, mqtt_port, 0, function(c)
