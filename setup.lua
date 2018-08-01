@@ -27,7 +27,7 @@ else
   file.writeline('mqtt_user = "user"')
   file.writeline('mqtt_password = "password"')
   file.writeline('mqtt_topic = "/sensor/' .. wifi.sta.getmac() ..'"')
-  file.writeline('mqtt_mode = 0')
+  file.writeline('mqtt_mode = 1')
   file.writeline('send_http = false')
   file.writeline('http_url = "http://202.38.64.40/upload_temp_humi.php"')
   file.writeline('send_aprs = false')
@@ -172,3 +172,13 @@ srv:listen(80,function(conn)
 end)
    
 print("Please connect to: " .. wifi.ap.getip() .. " do setup")
+
+function flashkeypress()
+  print("flash key pressed, delete config.lua")
+  file.remove("config.lua")
+end
+
+-- flash key io
+gpio.mode(3, gpio.INPUT)
+gpio.trig(3, "low", flashkeypress)
+

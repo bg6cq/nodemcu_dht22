@@ -47,12 +47,6 @@ function send_data(temp, humi)
 end
 
 function func_read_dht()
-  flashkey = gpio.read(3)
-  if (flashkey == 0) then
-    print("flash key pressed, next boot into config mode")
-    file.open("flashkey.txt","w")
-    file.close()
-  end
   status, temp, humi, temp_dec, humi_dec = dht.read(dht_pin)
   if(status == dht.OK) then
     print("DHT read count="..string.format("%d: temp=%.1f, humi=%.1f",count,temp,humi))
@@ -112,6 +106,7 @@ wifi.eventmon.register(wifi.eventmon.STA_CONNECTED, wifi_connect_event)
 wifi.eventmon.register(wifi.eventmon.STA_GOT_IP, wifi_got_ip_event)
 wifi.eventmon.register(wifi.eventmon.STA_DISCONNECTED, wifi_disconnect_event)
 
+print("My MAC is: "..wifi.sta.getmac())
 print("Connecting to WiFi access point...")
 
 wifi.setmode(wifi.STATION)
@@ -119,7 +114,14 @@ wifi.sta.config({ssid=wifi_ssid, pwd=wifi_password})
 wifi.sta.autoconnect(1)
 wifi.sta.connect()
 
+function flashkeypress()
+  print("flash key pressed, next boot into config mode")
+  file.open("flashkey.txt","w")
+  file.close()
+end
+
 -- flash key io
 gpio.mode(3, gpio.INPUT)
+gpio.trig(3, "low", flashkeypress)
 
 tmr.alarm(1,3000,tmr.ALARM_AUTO,func_read_dht)
