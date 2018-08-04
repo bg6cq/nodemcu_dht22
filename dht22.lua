@@ -11,6 +11,9 @@ gpio.mode(ledpin, gpio.OUTPUT)
 gpio.write(ledpin, 1)
 
 function blinkled()
+  if not flash_led then
+    return
+  end
   gpio.write(ledpin, 0)
   tmr.alarm(0, 500, 0, function ()
     gpio.write(ledpin, 1)
@@ -68,6 +71,9 @@ function func_read_dht()
   status, temp, humi, temp_dec, humi_dec = dht.read(dht_pin)
   if(status == dht.OK) then
     rssi = wifi.sta.getrssi()
+    if rssi == nil then
+      rssi = -100
+    end
     print("DHT read count="..string.format("%d: temp=%.1f, humi=%.1f, rssi=%d",count,temp,humi,rssi))
     if (mqtt_connected) then
        print("mqtt publish")

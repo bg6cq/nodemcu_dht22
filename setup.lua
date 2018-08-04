@@ -20,6 +20,7 @@ else
   file.writeline('wifi_ssid = "ustcnet"')
   file.writeline('wifi_password = ""')
   file.writeline('dht_pin = 2')
+  file.writeline('flash_led = true')
   file.writeline('send_interval = 300')
   file.writeline('send_mqtt = true')
   file.writeline('mqtt_host= "202.141.176.2"')
@@ -72,6 +73,9 @@ srv:listen(80,function(conn)
       file.writeline('wifi_ssid = "' .. _GET.wifissid .. '"')
       file.writeline('wifi_password = "' .. _GET.wifipassword .. '"')
       file.writeline('dht_pin = ' .. _GET.dhtpin )
+
+      if (_GET.flashled == nil) then _GET.flashled = "false" end
+      file.writeline('flash_led = ' .. _GET.flashled )
       
       if (_GET.sendmqtt == nil) then _GET.sendmqtt = "false" end
       if (_GET.mqtthost == nil) then _GET.mqtthost = "" end
@@ -120,6 +124,12 @@ srv:listen(80,function(conn)
     buf = buf .. "wifi SSID: <input type='text' name='wifissid' value='"..wifi_ssid.."'></input><br>"
     buf = buf .. "wifi password: <input type='text' name='wifipassword' value='"..wifi_password.."'></input><br>\n"
     buf = buf .. "DHT22 PIN: <input type='text' name='dhtpin' value='"..dht_pin.."'></input>(should be 2, GPIO4)<br>"
+
+    buf = buf .. "<hr>flash LED: <input type='checkbox' name='flashled' value='true'"
+    if (flash_led) then
+       buf = buf .. " checked"
+    end
+    buf = buf .. "></input>Flash LED when sending data<br>"
     
     buf = buf .. "<hr>MQTT send: <input type='checkbox' name='sendmqtt' value='true'"
     if (send_mqtt) then
@@ -173,7 +183,12 @@ end)
    
 print("Please connect to: " .. wifi.ap.getip() .. " do setup")
 
+flashkeypressed = false
 function flashkeypress()
+  if flashkeypressed then
+    return
+  end
+  flashkeypressed = true
   print("flash key pressed, delete config.lua")
   file.remove("config.lua")
 end
