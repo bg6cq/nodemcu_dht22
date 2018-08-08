@@ -20,6 +20,17 @@ function blinkled()
   end)
 end
 
+function mqtt_connect()
+  m:connect(mqtt_host, mqtt_port, 0, function(c)
+    mqtt_connected = true
+    print("mqtt online")
+    if mqtt_update then       
+      m:subscribe("/cmd/"..node.chipid(),0,function(conn) 
+        print("subscribe to cmd topic")
+      end)
+    end
+  end)
+end
 
 wifi_connect_event = function(T)
   print("Connection to AP("..T.SSID..") established!")
@@ -31,10 +42,7 @@ wifi_got_ip_event = function(T)
   print("Wifi connection is ready! IP address is: "..T.IP)
   if (send_mqtt and not mqtt_connected) then
     print("mqtt try connect to "..mqtt_host..":"..mqtt_port)
-    m:connect(mqtt_host, mqtt_port, 0, function(c)
-      print("mqtt online")
-      mqtt_connected = true
-    end)
+    mqtt_connect()
   end
 end
 
@@ -92,10 +100,7 @@ function func_read_dht()
          send_data()
          if (send_mqtt and not mqtt_connected) then
            print("mqtt try connect to "..mqtt_host..":"..mqtt_port)
-           m:connect(mqtt_host, mqtt_port, 0, function(c)
-             print("mqtt online")
-             mqtt_connected = true
-           end)
+           mqtt_connect()
          end
       else
          print("wifi still connecting...")
@@ -119,14 +124,25 @@ end
 
 if (send_mqtt) then
   print("init mqtt ESP8266SensorChipID".. node.chipid().." "..mqtt_user.." "..mqtt_password)
-  m = mqtt.Client("ESP8266SensorChipID" .. node.chipid() .. ")", 180, mqtt_user, mqtt_password)
+  m = mqtt.Client("ESP8266SensorChipID" .. node.chipid() .. ")", 180, mqtt_user, mqtt_password)  
+  if mqtt_update then
+    m:on("message",function(conn, topic, data) 
+      if data ~= nil then
+        print(topic .. ": " .. data)
+        if data == "update" then
+           print("reboot into update mode")
+           file.open("update.txt","w")
+           file.close()
+           node.restart()
+        end
+      end
+    end)
+  end
   m:on("offline", function(c)
     print("mqtt offline, try connect to "..mqtt_host..":"..mqtt_port)
-    mqtt_connected = false 
-    m:connect(mqtt_host, mqtt_port, 0, function(c)
-      mqtt_connected = true
-      end)
-    end)
+    mqtt_connected = false
+    mqtt_connect()
+  end)
 end
 
 wifi.eventmon.register(wifi.eventmon.STA_CONNECTED, wifi_connect_event)
@@ -141,7 +157,12 @@ wifi.sta.config({ssid=wifi_ssid, pwd=wifi_password})
 wifi.sta.autoconnect(1)
 wifi.sta.connect()
 
+flashkeypressed = false
 function flashkeypress()
+  if flashkeypressed then
+    return
+  end
+  flashkeypressed = true
   print("flash key pressed, next boot into config mode")
   file.open("flashkey.txt","w")
   file.close()
