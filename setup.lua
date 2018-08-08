@@ -29,6 +29,7 @@ else
   file.writeline('mqtt_password = "password"')
   file.writeline('mqtt_topic = "/sensor/' .. wifi.sta.getmac() ..'"')
   file.writeline('mqtt_mode = 1')
+  file.writeline('mqtt_update = true')
   file.writeline('send_http = false')
   file.writeline('http_url = "http://202.38.64.40/upload_temp_humi.php"')
   file.writeline('send_aprs = false')
@@ -84,6 +85,7 @@ srv:listen(80,function(conn)
       if (_GET.mqttpassword == nil) then _GET.mqttpassword = "" end
       if (_GET.mqtttopic == nil) then _GET.mqtttopic = "" end
       if (_GET.mqttmode == nil) then _GET.mqttmode = 0 end
+      if (_GET.mqttupdate == nil) then _GET.mqttupdate = "false" end
       
       file.writeline('send_mqtt = ' .. _GET.sendmqtt )
       file.writeline('mqtt_host = "' .. _GET.mqtthost .. '"')
@@ -92,6 +94,7 @@ srv:listen(80,function(conn)
       file.writeline('mqtt_password = "' .. _GET.mqttpassword .. '"')
       file.writeline('mqtt_mode = ' .. _GET.mqttmode )
       file.writeline('mqtt_topic = "' .. _GET.mqtttopic .. '"')
+      file.writeline('mqtt_update = ' .. _GET.mqttupdate )
       
       if (_GET.sendinterval == nil) then _GET.sendinterval = "300" end
       if (_GET.sendhttp == nil) then _GET.sendhttp = "false" end
@@ -153,6 +156,11 @@ srv:listen(80,function(conn)
     buf = buf .. ">Mode 1</input><br>"
     buf = buf .. "mode 0: send seprate temperature & humidity<br>"
     buf = buf .. "mode 1: send json string<br>"
+    buf = buf .. "<hr>MQTT update: <input type='checkbox' name='mqttupdate' value='true'"
+    if (mqtt_update) then
+       buf = buf .. " checked"
+    end 
+    buf = buf .. "></input>allow mqtt remote update lua file<br>"
     
     
     buf = buf .. "<hr>HTTP and APRS<br>Send interval: <input type='text' name='sendinterval' value='"..send_interval.."'></input>seconds<br>\n"
