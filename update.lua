@@ -66,7 +66,7 @@ function mqtt_connect()
   m:connect(mqtt_host, mqtt_port, 0, function(c)
     print("mqtt online")
     mqtt_connected = true
-    if mqtt_update then       
+    if mqtt_update then
       m:subscribe("/cmd/"..node.chipid(),0,function(conn)
         m:publish("/response/"..node.chipid(),"ready" ,0,0)
         print("subscribe to cmd topic")
@@ -85,10 +85,12 @@ function download(name, len)
     if (payloadFound == true) then
       file.write(payload)
       file.flush()
+      print("got content len=", #payload)
     else
       if (string.find(payload,"\r\n\r\n") ~= nil) then
         file.write(string.sub(payload,string.find(payload,"\r\n\r\n") + 4))
         file.flush()
+        print("got content len=", #payload)
         payloadFound = true
       end
     end
@@ -102,13 +104,13 @@ function download(name, len)
        file.remove(name)
        fw = file.open(name, "w")
        fd = file.open("tmp.tmp", "r")
-       if fd then
+       if fd and fw then
          result = fd:read()
-         if fw then
+         while result ~= nil do
            fw:write(result)
-           fw:close()
-           m:publish("/response/"..node.chipid(),"file "..name.." updated",0,0)
+           result = fd:read()
          end
+         m:publish("/response/"..node.chipid(),"file "..name.." updated, len="..file.stat(name).size,0,0)
        end
        fd:close()
        fw:close()
@@ -127,7 +129,7 @@ function download(name, len)
        "Connection: close\r\n"..
        "Accept-Charset: utf-8\r\n"..
        "Accept-Encoding: \r\n"..
-       "User-Agent: Mozilla/4.0 (compatible; esp8266 Lua; Windows NT 5.1)\r\n".. 
+       "User-Agent: Mozilla/4.0 (compatible; esp8266 Lua; Windows NT 5.1)\r\n"..
        "Accept: */*\r\n\r\n")
     end)
   conn:connect(80,url_host)
@@ -135,7 +137,7 @@ end
 
 blinkled1s()
 print("init mqtt ESP8266SensorChipID".. node.chipid().." "..mqtt_user.." "..mqtt_password)
-m = mqtt.Client("ESP8266SensorChipID" .. node.chipid() .. ")", 180, mqtt_user, mqtt_password)  
+m = mqtt.Client("ESP8266SensorChipID" .. node.chipid() .. ")", 180, mqtt_user, mqtt_password)
 m:on("message",function(conn, topic, data) 
   if data ~= nil then
     print(topic .. ": " .. data)
@@ -145,8 +147,16 @@ m:on("message",function(conn, topic, data)
       file.close()
       node.restart()
     end
-    if data == "restart" then      
+    if data == "restart" then
       node.restart()
+    end
+    if data == "list" then
+      l = file.list();
+      for k,v in pairs(l) do
+        m:publish("/response/"..node.chipid(),"name:"..k..", size:"..v,0,0)
+      end
+      l = nil
+      collectgarbage()
     end
     d = mysplit(data, " ")
     if d[1] ~= nil and d[2]~= nill then

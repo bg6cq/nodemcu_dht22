@@ -218,4 +218,3 @@ end)
 -- flash key io
 gpio.mode(3, gpio.INPUT, gpio.PULLUP)
 gpio.trig(3, "low", flashkeypress)
-

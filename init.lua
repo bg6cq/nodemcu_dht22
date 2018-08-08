@@ -1,4 +1,9 @@
-if (file.exists("config.lua") and (not file.exists("flashkey.txt"))) then
+if file.exists("update.txt") then
+  -- enter update mode
+  file.remove("update.txt")
+  print("go into update mode")
+  dofile("update.lua")
+elseif (file.exists("config.lua") and (not file.exists("flashkey.txt"))) then
   print("normal startup")
   dofile("dht22.lua")
 else
