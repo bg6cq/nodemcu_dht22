@@ -66,18 +66,18 @@ srv:listen(80,function(conn)
     if (_GET.wifissid ~= nil) then
       print("Saving data")
       file.open("config.lua", "w")
-      
+
       if (_GET.wifissid == nil) then _GET.wifissid = "" end
       if (_GET.wifipassword == nil) then _GET.wifipassword = "" end
       if (_GET.dhtpin == nil) then _GET.dhtpin = "2" end
-      
+
       file.writeline('wifi_ssid = "' .. _GET.wifissid .. '"')
       file.writeline('wifi_password = "' .. _GET.wifipassword .. '"')
       file.writeline('dht_pin = ' .. _GET.dhtpin )
 
       if (_GET.flashled == nil) then _GET.flashled = "false" end
       file.writeline('flash_led = ' .. _GET.flashled )
-      
+
       if (_GET.sendmqtt == nil) then _GET.sendmqtt = "false" end
       if (_GET.mqtthost == nil) then _GET.mqtthost = "" end
       if (_GET.mqttport == nil) then _GET.mqttport = "1883" end
@@ -86,7 +86,7 @@ srv:listen(80,function(conn)
       if (_GET.mqtttopic == nil) then _GET.mqtttopic = "" end
       if (_GET.mqttmode == nil) then _GET.mqttmode = 0 end
       if (_GET.mqttupdate == nil) then _GET.mqttupdate = "false" end
-      
+
       file.writeline('send_mqtt = ' .. _GET.sendmqtt )
       file.writeline('mqtt_host = "' .. _GET.mqtthost .. '"')
       file.writeline('mqtt_port = ' .. _GET.mqttport )
@@ -95,10 +95,10 @@ srv:listen(80,function(conn)
       file.writeline('mqtt_mode = ' .. _GET.mqttmode )
       file.writeline('mqtt_topic = "' .. _GET.mqtttopic .. '"')
       file.writeline('mqtt_update = ' .. _GET.mqttupdate )
-      
+
       if (_GET.sendinterval == nil) then _GET.sendinterval = "300" end
       if (_GET.sendhttp == nil) then _GET.sendhttp = "false" end
-      if (_GET.httpurl == nil) then _GET.httpurl = "" end            
+      if (_GET.httpurl == nil) then _GET.httpurl = "" end
       file.writeline('send_interval = ' .. _GET.sendinterval )
       file.writeline('send_http = '.. _GET.sendhttp)
       file.writeline('http_url = "' .. _GET.httpurl .. '"')
@@ -107,12 +107,12 @@ srv:listen(80,function(conn)
       if (_GET.aprshost == nil) then _GET.aprshost = "202.141.176.2" end
       if (_GET.aprsport == nil) then _GET.aprsport = "14580" end
       if (_GET.aprsprefix == nil) then _GET.aprsprefix = "" end
-            
+
       file.writeline('send_aprs = '.. _GET.sendaprs)
       file.writeline('aprs_host = "' .. _GET.aprshost .. '"')
       file.writeline('aprs_port = ' .. _GET.aprsport )
       file.writeline('aprs_prefix = "' .. _GET.aprsprefix .. '"')
-      
+
       file.close()
       buf = "HTTP/1.0 200 OK\r\nContent-Type: text/html\r\n\r\n<!DOCTYPE HTML>\n<html><body>"
       buf = buf .. "config saved, please reboot<p><a href=http://192.168.0.1/>go back</a>"
@@ -133,13 +133,13 @@ srv:listen(80,function(conn)
        buf = buf .. " checked"
     end
     buf = buf .. "></input>Flash LED when sending data<br>"
-    
+
     buf = buf .. "<hr>MQTT send: <input type='checkbox' name='sendmqtt' value='true'"
     if (send_mqtt) then
        buf = buf .. " checked"
-    end 
+    end
     buf = buf .. "></input><br>"
-    
+
     buf = buf .. "MQTT host: <input type='text' name='mqtthost' value='"..mqtt_host.."'></input><br>\n"
     buf = buf .. "MQTT port: <input type='text' name='mqttport' value='"..mqtt_port.."'></input><br>\n"
     buf = buf .. "MQTT user: <input type='text' name='mqttuser' value='"..mqtt_user.."'></input><br>\n"
@@ -159,12 +159,12 @@ srv:listen(80,function(conn)
     buf = buf .. "<hr>MQTT update: <input type='checkbox' name='mqttupdate' value='true'"
     if (mqtt_update) then
        buf = buf .. " checked"
-    end 
+    end
     buf = buf .. "></input>allow mqtt remote update lua file<br>"
-    
-    
+
+
     buf = buf .. "<hr>HTTP and APRS<br>Send interval: <input type='text' name='sendinterval' value='"..send_interval.."'></input>seconds<br>\n"
-    
+
     buf = buf .. "<hr>HTTP send: <input type='checkbox' name='sendhttp' value='true'"
     if (send_http) then
       buf = buf .. " checked"
@@ -180,15 +180,16 @@ srv:listen(80,function(conn)
     buf = buf .. "APRS host: <input type='text' name='aprshost' value='"..aprs_host.."'></input><br>\n"
     buf = buf .. "APRS port: <input type='text' name='aprsport' value='"..aprs_port.."'></input><br>\n"
     buf = buf .. "APRS prefix: <input type='text' name='aprsprefix' size=100 value='"..aprs_prefix.."'></input><br>\n"
-    
+
     buf = buf .. "<br><button type='submit'>Save</button></form><p>\n"
     buf = buf .. "<hr><a href=https://github.com/bg6cq/nodemcu_dht22>https://github.com/bg6cq/nodemcu_dht22</a> by james@ustc.edu.cn</body></html>\n"
     client:send(buf)
+    buf = nil
     -- client:close()
     collectgarbage()
   end)
 end)
-   
+
 print("Please connect to: " .. wifi.ap.getip() .. " do setup")
 
 flashkeypressed = false
@@ -202,8 +203,8 @@ function flashkeypress()
 end
 
 -- blink led every 0.5s
-local ledpin = 4
-local ledstatus = 0
+ledpin = 4
+ledstatus = 0
 gpio.mode(ledpin, gpio.OUTPUT)
 gpio.write(ledpin, ledstatus)
 tmr.alarm(0, 500, 1, function ()

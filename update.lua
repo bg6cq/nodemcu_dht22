@@ -47,11 +47,10 @@ end
 wifi_connect_event = function(T)
   print("Connection to AP("..T.SSID..") established!")
   print("Waiting for IP address...")
-  if disconnect_ct ~= nil then disconnect_ct = nil end
 end
 
 wifi_got_ip_event = function(T)
-  print("Wifi connection is ready! IP address is: "..T.IP)
+  print("Wifi ready! IP is: "..T.IP)
   if not mqtt_connected then
     print("mqtt try connect to "..mqtt_host..":"..mqtt_port)
     mqtt_connect()
@@ -80,7 +79,7 @@ function download(name, len)
   blinkled05s()
   file.open("tmp.tmp", "w+")
   payloadFound = false
-  conn=net.createConnection(net.TCP) 
+  conn=net.createConnection(net.TCP)
   conn:on("receive", function(conn, payload)
     if (payloadFound == true) then
       file.write(payload)
@@ -97,7 +96,7 @@ function download(name, len)
     payload = nil
     collectgarbage()
   end)
-  conn:on("disconnection", function(conn) 
+  conn:on("disconnection", function(conn)
      conn = nil
      file.close()
      if file.stat("tmp.tmp").size == tonumber(len) then  -- file OK
@@ -138,7 +137,7 @@ end
 blinkled1s()
 print("init mqtt ESP8266SensorChipID".. node.chipid().." "..mqtt_user.." "..mqtt_password)
 m = mqtt.Client("ESP8266SensorChipID" .. node.chipid() .. ")", 180, mqtt_user, mqtt_password)
-m:on("message",function(conn, topic, data) 
+m:on("message",function(conn, topic, data)
   if data ~= nil then
     print(topic .. ": " .. data)
     if data == "update" then
@@ -166,7 +165,7 @@ m:on("message",function(conn, topic, data)
 end)
 m:on("offline", function(c)
   print("mqtt offline, try connect to "..mqtt_host..":"..mqtt_port)
-  mqtt_connected = false 
+  mqtt_connected = false
   mqtt_connect()
 end)
 
