@@ -81,7 +81,8 @@ function func_read_dht()
     if rssi == nil then
       rssi = -100
     end
-    print("DHT read count="..string.format("%d: temp=%.1f, humi=%.1f, rssi=%d",count,temp,humi,rssi))
+    print("DHT read count="..string.format("%d: temp=%.1f, humi=%.1f, rssi=%d, uptime=%d",
+      count,temp,humi,rssi, tmr.time()))
     if mqtt_connected then
        print("mqtt publish")
        if mqtt_mode == 0 then
@@ -89,7 +90,8 @@ function func_read_dht()
          m:publish(mqtt_topic .. "/humidity", string.format("%.1f", humi),0,0)
          m:publish(mqtt_topic .. "/rssi", string.format("%d", rssi),0,0)
        else
-         m:publish(mqtt_topic, string.format("{\"temperature\": %.1f, \"humidity\": %.1f, \"rssi\": %d}", temp, humi, rssi),0,0)
+         m:publish(mqtt_topic, string.format("{\"temperature\": %.1f, \"humidity\": %.1f, \"rssi\": %d, \"uptime\": %d}",
+           temp, humi, rssi, tmr.time()),0,0)
        end
        blinkled()
     end
