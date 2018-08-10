@@ -10,12 +10,12 @@ local ledpin = 4
 gpio.mode(ledpin, gpio.OUTPUT)
 gpio.write(ledpin, 1)
 
-function blinkled()
+function blinkled(t)
   if not flash_led then
     return
   end
   gpio.write(ledpin, 0)
-  tmr.alarm(0, 500, 0, function ()
+  tmr.alarm(0, t, 0, function ()
     gpio.write(ledpin, 1)
   end)
 end
@@ -47,6 +47,7 @@ end
 
 wifi_disconnect_event = function(T)
   print("wifi disconnect")
+  mqtt_connected = false
 end
 
 function send_data()
@@ -58,7 +59,7 @@ function send_data()
     conn = net.createUDPSocket()
     conn:send(aprs_port,aprs_host,str)
     conn:close()
-    blinkled()
+    data_send = true
   end
   if send_http then
     req_url = http_url.."?mac="..wifi.sta.getmac().."&"..string.format("temp=%.1f&humi=%.1f&rssi=%d",temp,humi,rssi)
@@ -68,55 +69,59 @@ function send_data()
         print("HTTP request failed")
       else
         print(code, data)
-        blinkled()
+        data_send = true
       end
     end)
   end
 end
 
 function func_read_dht()
-  status, temp, humi, temp_dec, humi_dec = dht.readxx(dht_pin)
-  if status == dht.OK then
-    rssi = wifi.sta.getrssi()
-    if rssi == nil then
-      rssi = -100
-    end
-    print("DHT read count="..string.format("%d: temp=%.1f, humi=%.1f, rssi=%d, uptime=%d",
-      count,temp,humi,rssi, tmr.time()))
-    if mqtt_connected then
-       print("mqtt publish")
-       if mqtt_mode == 0 then
-         m:publish(mqtt_topic .. "/temperature", string.format("%.1f", temp),0,0)
-         m:publish(mqtt_topic .. "/humidity", string.format("%.1f", humi),0,0)
-         m:publish(mqtt_topic .. "/rssi", string.format("%d", rssi),0,0)
-       else
-         m:publish(mqtt_topic, string.format("{\"temperature\": %.1f, \"humidity\": %.1f, \"rssi\": %d, \"uptime\": %d}",
-           temp, humi, rssi, tmr.time()),0,0)
-       end
-       blinkled()
-    end
-    count = count + 1
-    if count == 4 then
-      if wifi.sta.status() == 5 then  --STA_GOTIP
-         send_data()
-         if send_mqtt and not mqtt_connected then
-           print("mqtt try connect to "..mqtt_host..":"..mqtt_port)
-           mqtt_connect()
-         end
-      else
-         print("wifi still connecting...")
-      end
-    end
-    if count*3 >= send_interval then
-      count = 0
-    end
-  elseif dht_status == dht.ERROR_CHECKSUM then
-    print("DHT read Checksum error")
-  elseif dht_status == dht.ERROR_TIMEOUT then
-    print("DHT read Time out")
-  else
-    print("DHT read null")
+  count = count + 1
+  if count*3 >= send_interval then
+    count = 0
   end
+  status, temp, humi, temp_dec, humi_dec = dht.readxx(dht_pin)
+  if status ~= dht.OK then
+    if dht_status == dht.ERROR_CHECKSUM then
+      print("DHT read Checksum error")
+    elseif dht_status == dht.ERROR_TIMEOUT then
+      print("DHT read Time out")
+    else
+      print("DHT read null")
+    end
+    blinkled(100)
+    return
+  end
+  if wifi.sta.status() ~= 5 then
+    print("wifi still connecting...")
+    blinkled(100)
+    return
+  end
+
+  rssi = wifi.sta.getrssi()
+  if rssi == nil then
+    rssi = -100
+  end
+  data_send = false
+  print("DHT read count="..string.format("%d: temp=%.1f, humi=%.1f, rssi=%d, uptime=%d",
+    count,temp,humi,rssi,tmr.time()))
+  if mqtt_connected then
+    print("mqtt publish")
+    m:publish(mqtt_topic, string.format("{\"temperature\": %.1f, \"humidity\": %.1f, \"rssi\": %d, \"uptime\": %d}",
+      temp, humi, rssi, tmr.time()),0,0)
+    data_send = true
+  end
+  if count == 4 then
+    send_data()
+  end
+  if data_send then
+    blinkled(500)
+  else
+    blinkled(100)
+  end
+ --    if send_mqtt and not mqtt_connected then
+ --          print("mqtt try connect to "..mqtt_host..":"..mqtt_port)
+ --          mqtt_connect()
 end
 
 if send_interval < 15 then
@@ -124,8 +129,8 @@ if send_interval < 15 then
 end
 
 if send_mqtt then
-  print("init mqtt ESP8266SensorChipID".. node.chipid().." "..mqtt_user.." "..mqtt_password)
-  m = mqtt.Client("ESP8266SensorChipID" .. node.chipid() .. ")", 180, mqtt_user, mqtt_password)
+  print("init mqtt ChipID"..node.chipid().." "..mqtt_user.." "..mqtt_password)
+  m = mqtt.Client("ESP8266SensorChipID"..node.chipid() .. ")",180,mqtt_user,mqtt_password)
   if mqtt_update then
     m:on("message",function(conn, topic, data)
       if data ~= nil then
@@ -146,13 +151,12 @@ if send_mqtt then
   end)
 end
 
+print("My MAC is: "..wifi.sta.getmac())
+print("Connecting to AP...")
+
 wifi.eventmon.register(wifi.eventmon.STA_CONNECTED, wifi_connect_event)
 wifi.eventmon.register(wifi.eventmon.STA_GOT_IP, wifi_got_ip_event)
 wifi.eventmon.register(wifi.eventmon.STA_DISCONNECTED, wifi_disconnect_event)
-
-print("My MAC is: "..wifi.sta.getmac())
-print("Connecting to WiFi access point...")
-
 wifi.setmode(wifi.STATION)
 wifi.sta.config({ssid=wifi_ssid, pwd=wifi_password})
 wifi.sta.autoconnect(1)
