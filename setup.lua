@@ -28,7 +28,6 @@ else
   file.writeline('mqtt_user = "user"')
   file.writeline('mqtt_password = "password"')
   file.writeline('mqtt_topic = "/sensor/' .. wifi.sta.getmac() ..'"')
-  file.writeline('mqtt_mode = 1')
   file.writeline('mqtt_update = true')
   file.writeline('send_http = false')
   file.writeline('http_url = "http://202.38.64.40/upload_temp_humi.php"')
@@ -92,7 +91,6 @@ srv:listen(80,function(conn)
       file.writeline('mqtt_port = ' .. _GET.mqttport )
       file.writeline('mqtt_user = "' .. _GET.mqttuser .. '"')
       file.writeline('mqtt_password = "' .. _GET.mqttpassword .. '"')
-      file.writeline('mqtt_mode = ' .. _GET.mqttmode )
       file.writeline('mqtt_topic = "' .. _GET.mqtttopic .. '"')
       file.writeline('mqtt_update = ' .. _GET.mqttupdate )
 
@@ -145,23 +143,11 @@ srv:listen(80,function(conn)
     buf = buf .. "MQTT user: <input type='text' name='mqttuser' value='"..mqtt_user.."'></input><br>\n"
     buf = buf .. "MQTT password: <input type='text' name='mqttpassword' value='"..mqtt_password.."'></input><br>\n"
     buf = buf .. "MQTT topic: <input type='text' name='mqtttopic' value='"..mqtt_topic.."'></input><br>\n"
-    buf = buf .. "MQTT Mode: <input type='radio' name='mqttmode' value=0"
-    if (mqtt_mode == 0) then
-      buf = buf .. " checked"
-    end
-    buf = buf .. ">Mode 0</input><input type='radio' name='mqttmode' value=1"
-    if (mqtt_mode == 1) then
-      buf = buf .. " checked"
-    end
-    buf = buf .. ">Mode 1</input><br>"
-    buf = buf .. "mode 0: send seprate temperature & humidity<br>"
-    buf = buf .. "mode 1: send json string<br>"
     buf = buf .. "<hr>MQTT update: <input type='checkbox' name='mqttupdate' value='true'"
     if (mqtt_update) then
        buf = buf .. " checked"
     end
     buf = buf .. "></input>allow mqtt remote update lua file<br>"
-
 
     buf = buf .. "<hr>HTTP and APRS<br>Send interval: <input type='text' name='sendinterval' value='"..send_interval.."'></input>seconds<br>\n"
 
@@ -190,7 +176,7 @@ srv:listen(80,function(conn)
   end)
 end)
 
-print("Please connect to: " .. wifi.ap.getip() .. " do setup")
+print("Please connect to: http://"..wifi.ap.getip().." do setup")
 
 flashkeypressed = false
 function flashkeypress()
