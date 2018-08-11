@@ -46,8 +46,7 @@ wifi_got_ip_event = function(T)
 end
 
 wifi_disconnect_event = function(T)
-  print("wifi disconnect")
-  mqtt_connected = false
+  print("wifi disconnect")  
 end
 
 function send_data()
@@ -75,6 +74,9 @@ function send_data()
   end
 end
 
+read_error = 0
+wifi_error = 0
+
 function func_read_dht()
   count = count + 1
   if count*3 >= send_interval then
@@ -82,6 +84,10 @@ function func_read_dht()
   end
   status, temp, humi, temp_dec, humi_dec = dht.readxx(dht_pin)
   if status ~= dht.OK then
+    read_error = read_error + 1
+    if read_error > 100 then
+      node.restart()
+    end
     if dht_status == dht.ERROR_CHECKSUM then
       print("DHT read Checksum error")
     elseif dht_status == dht.ERROR_TIMEOUT then
@@ -93,6 +99,10 @@ function func_read_dht()
     return
   end
   if wifi.sta.status() ~= 5 then
+    wifi_error = wifi_error + 1
+    if wifi_error > 200 then
+      node.restart()
+    end
     print("wifi still connecting...")
     blinkled(100)
     return
@@ -110,22 +120,30 @@ function func_read_dht()
     m:publish(mqtt_topic, string.format("{\"temperature\": %.1f, \"humidity\": %.1f, \"rssi\": %d, \"uptime\": %d}",
       temp, humi, rssi, tmr.time()),0,0)
     data_send = true
+  elseif send_mqtt then
+    print("mqtt try connect to "..mqtt_host..":"..mqtt_port)
+    mqtt_connect()
   end
+
   if count == 4 then
     send_data()
   end
   if data_send then
+    wifi_error = 0
     blinkled(500)
   else
+    wifi_error = wifi_error + 1
+    if wifi_error > 200 then
+      node.restart()
+    end
     blinkled(100)
   end
- --    if send_mqtt and not mqtt_connected then
- --          print("mqtt try connect to "..mqtt_host..":"..mqtt_port)
- --          mqtt_connect()
 end
 
 if send_interval < 15 then
   send_interval = 15
+elseif send_interval > 300 then
+  send_interval = 300
 end
 
 if send_mqtt then
