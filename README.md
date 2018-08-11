@@ -77,3 +77,16 @@ https://gist.github.com/thomo/bb539bb7d5b5f2398a62c7d6ef1231b4
    也可以在运行时，按 FLASH 键超过3秒钟，下次启动将进入配置模式。
 
    在配置模式，可以用手机等终端，连接 "ESP8266" SSID，访问 http://192.168.0.1 ，修改配置后单击 "save" 保存。
+
+
+```
+reset_reson:
+
+0, power-on
+1, hardware watchdog reset
+2, exception reset
+3, software watchdog reset
+4, software restart
+5, wake from deep sleep
+6, external reset
+```
