@@ -130,7 +130,9 @@ end
 
 if send_mqtt then
   print("init mqtt ChipID"..node.chipid().." "..mqtt_user.." "..mqtt_password)
-  m = mqtt.Client("ESP8266SensorChipID"..node.chipid() .. ")",180,mqtt_user,mqtt_password)
+  _, reset_reason = node.bootreason()
+  if reset_reason == nil then reset_reason = 255 end
+  m = mqtt.Client("ESP8266Sensor_"..node.chipid()..string.format("_%d",reset_reason),180,mqtt_user,mqtt_password)
   if mqtt_update then
     m:on("message",function(conn, topic, data)
       if data ~= nil then
